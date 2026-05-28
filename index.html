@@ -17,342 +17,245 @@
                 --red-faint: rgba(160, 15, 0, 0.35);
             }
 
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
+            *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
             body {
                 background: #000;
                 overflow: hidden;
                 font-family: "Cinzel", serif;
                 color: var(--red);
+                /* prevent iOS tap highlight */
+                -webkit-tap-highlight-color: transparent;
             }
 
-            #canvas-wrap {
-                position: fixed;
-                inset: 0;
-            }
+            #canvas-wrap { position: fixed; inset: 0; }
 
-            /* ── Vignette + UI layer ───────────────────────────── */
-            #ui {
-                position: fixed;
-                inset: 0;
-                pointer-events: none;
-                z-index: 10;
-            }
+            /* ── Vignette + UI ─────────────────────────────────── */
+            #ui { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
             #ui::after {
-                content: "";
-                position: absolute;
-                inset: 0;
-                background: radial-gradient(
-                    ellipse at center,
-                    transparent 28%,
-                    rgba(0, 0, 0, 0.93) 100%
-                );
+                content: ""; position: absolute; inset: 0;
+                background: radial-gradient(ellipse at center, transparent 28%, rgba(0,0,0,0.93) 100%);
                 pointer-events: none;
             }
 
             /* ── Ornate frame ──────────────────────────────────── */
-            #frame {
-                position: fixed;
-                inset: 0;
-                z-index: 6;
-                pointer-events: none;
-            }
-            /* outer border line */
+            #frame { position: fixed; inset: 0; z-index: 6; pointer-events: none; }
             #frame::before {
-                content: "";
-                position: absolute;
-                inset: 13px;
+                content: ""; position: absolute; inset: 8px;
                 border: 1px solid var(--red-faint);
-                box-shadow:
-                    0 0 22px rgba(200, 18, 0, 0.22),
-                    inset 0 0 22px rgba(200, 18, 0, 0.1);
+                box-shadow: 0 0 22px rgba(200,18,0,0.22), inset 0 0 22px rgba(200,18,0,0.1);
             }
-            /* inner echo border */
             #frame::after {
-                content: "";
-                position: absolute;
-                inset: 21px;
-                border: 1px solid rgba(100, 8, 0, 0.28);
+                content: ""; position: absolute; inset: 15px;
+                border: 1px solid rgba(100,8,0,0.28);
             }
             .corner {
                 position: absolute;
-                filter: drop-shadow(0 0 5px rgba(200, 20, 0, 0.7));
+                width: 42px; height: 42px;
+                filter: drop-shadow(0 0 4px rgba(200,20,0,0.7));
             }
-            .corner.tl {
-                top: 13px;
-                left: 13px;
-            }
-            .corner.tr {
-                top: 13px;
-                right: 13px;
-            }
-            .corner.bl {
-                bottom: 13px;
-                left: 13px;
-            }
-            .corner.br {
-                bottom: 13px;
-                right: 13px;
-            }
+            .corner svg { width: 100%; height: 100%; }
+            .corner.tl { top: 8px;    left: 8px; }
+            .corner.tr { top: 8px;    right: 8px; }
+            .corner.bl { bottom: 8px; left: 8px; }
+            .corner.br { bottom: 8px; right: 8px; }
 
             /* ── Intro / Disclaimer ────────────────────────────── */
             #intro {
-                position: absolute;
-                inset: 0;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 0;
-                pointer-events: all;
-                cursor: pointer;
+                position: absolute; inset: 0;
+                display: flex; flex-direction: column;
+                align-items: center; justify-content: center;
+                padding: 5vw;
+                pointer-events: all; cursor: pointer;
                 transition: opacity 1.8s ease;
             }
             #intro .disclaimer {
-                font-family: "Cinzel", serif;
-                font-size: 0.62rem;
-                letter-spacing: 0.5em;
-                color: var(--red-dim);
-                margin-bottom: 1.6rem;
+                font-size: clamp(0.55rem, 2.5vw, 0.62rem);
+                letter-spacing: 0.45em; color: var(--red-dim);
+                margin-bottom: 1.4rem;
                 animation: breathe 3s ease-in-out infinite;
             }
             #intro h1 {
                 font-family: "Bebas Neue", sans-serif;
-                font-size: clamp(1.8rem, 5.5vw, 4rem);
-                letter-spacing: 0.3em;
-                text-align: center;
-                line-height: 1.4;
+                font-size: clamp(1.6rem, 7vw, 4rem);
+                letter-spacing: 0.25em; text-align: center; line-height: 1.35;
                 color: var(--red);
-                text-shadow:
-                    0 0 30px var(--red-glow),
-                    0 0 60px rgba(200, 20, 0, 0.35);
+                text-shadow: 0 0 30px var(--red-glow), 0 0 60px rgba(200,20,0,0.35);
                 animation: breathe 2.8s ease-in-out infinite;
             }
             #intro .body {
-                margin-top: 1.4rem;
-                font-family: "Cinzel", serif;
-                font-size: clamp(0.7rem, 1.6vw, 0.95rem);
-                letter-spacing: 0.22em;
-                text-align: center;
-                line-height: 2;
+                margin-top: 1.2rem;
+                font-size: clamp(0.72rem, 2.8vw, 0.95rem);
+                letter-spacing: 0.18em; text-align: center; line-height: 2;
                 color: #7a1500;
             }
             #intro .cta {
-                margin-top: 3rem;
-                font-size: 0.58rem;
-                letter-spacing: 0.55em;
-                color: #3a0800;
+                margin-top: 2.5rem;
+                font-size: clamp(0.55rem, 2vw, 0.62rem);
+                letter-spacing: 0.45em; color: #3a0800;
                 animation: breathe 2.8s ease-in-out infinite 1.4s;
             }
-            @keyframes breathe {
-                0%,
-                100% {
-                    opacity: 0.45;
-                }
-                50% {
-                    opacity: 1;
-                }
-            }
+            @keyframes breathe { 0%,100%{ opacity:.45 } 50%{ opacity:1 } }
 
             /* ── Lyric overlay ─────────────────────────────────── */
             #lyric {
-                position: absolute;
-                bottom: 13%;
-                left: 50%;
-                transform: translateX(-50%);
+                position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
+                width: 88%;
                 font-family: "Cinzel", serif;
-                font-size: clamp(0.8rem, 2.2vw, 1.15rem);
-                letter-spacing: 0.28em;
-                text-align: center;
-                white-space: nowrap;
+                font-size: clamp(0.75rem, 3vw, 1.15rem);
+                letter-spacing: 0.2em; text-align: center;
                 color: var(--red);
                 text-shadow: 0 0 24px var(--red-glow);
-                opacity: 0;
-                transition: opacity 0.9s ease;
+                opacity: 0; transition: opacity 0.9s ease;
             }
 
             /* ── Choice UI ─────────────────────────────────────── */
             #choice-prompt {
-                position: absolute;
-                top: 10%;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 0.58rem;
-                letter-spacing: 0.55em;
-                color: var(--red-dim);
-                opacity: 0;
-                transition: opacity 0.9s;
+                position: absolute; top: 9%; left: 50%; transform: translateX(-50%);
+                font-size: clamp(0.5rem, 1.8vw, 0.58rem);
+                letter-spacing: 0.45em; color: var(--red-dim);
+                opacity: 0; transition: opacity 0.9s; white-space: nowrap;
             }
             .door-label {
                 position: absolute;
-                font-size: clamp(1.8rem, 4.5vw, 3.5rem);
-                opacity: 0;
-                transition: opacity 0.8s;
-                text-align: center;
-                pointer-events: none;
+                font-size: clamp(1.4rem, 6vw, 3.5rem);
+                opacity: 0; transition: opacity 0.8s;
+                text-align: center; pointer-events: none;
             }
-            /* GUT — holy: warm gold, Cinzel */
+            /* Holy — warm gold, Cinzel */
             #lbl-l {
-                top: 7%;
-                left: 26%;
-                transform: translateX(-50%);
-                font-family: "Cinzel", serif;
-                font-weight: 600;
-                letter-spacing: 0.18em;
-                color: #d4a830;
-                text-shadow:
-                    0 0 18px rgba(220, 170, 50, 0.95),
-                    0 0 40px rgba(200, 150, 30, 0.55),
-                    0 0 70px rgba(180, 130, 10, 0.25);
+                top: 6%; left: 22%; transform: translateX(-50%);
+                font-family: "Cinzel", serif; font-weight: 600;
+                letter-spacing: 0.12em; color: #d4a830;
+                text-shadow: 0 0 18px rgba(220,170,50,0.95), 0 0 40px rgba(200,150,30,0.55);
             }
-            /* BÖSE — evil: blood red, Bebas Neue */
+            /* Evil — blood red, Bebas Neue */
             #lbl-r {
-                top: 7%;
-                right: 26%;
-                transform: translateX(50%);
+                top: 6%; right: 22%; transform: translateX(50%);
                 font-family: "Bebas Neue", sans-serif;
-                letter-spacing: 0.06em;
-                color: #cc0000;
-                text-shadow:
-                    0 0 16px rgba(220, 0, 0, 0.95),
-                    0 0 36px rgba(180, 0, 0, 0.6),
-                    0 0 70px rgba(140, 0, 0, 0.3);
+                letter-spacing: 0.06em; color: #cc0000;
+                text-shadow: 0 0 16px rgba(220,0,0,0.95), 0 0 36px rgba(180,0,0,0.6);
             }
 
             /* ── Sigil pips ────────────────────────────────────── */
             #pips {
-                position: absolute;
-                top: 28px;
-                left: 50%;
-                transform: translateX(-50%);
-                display: flex;
-                gap: 22px;
-                opacity: 0;
-                transition: opacity 0.6s;
-                z-index: 20;
+                position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+                display: flex; gap: 18px; opacity: 0; transition: opacity 0.6s; z-index: 20;
             }
             .pip {
-                width: 9px;
-                height: 9px;
-                border-radius: 50%;
+                width: 9px; height: 9px; border-radius: 50%;
                 border: 1px solid #2a0400;
             }
             .pip.lit {
-                background: var(--red);
-                border-color: var(--red);
+                background: var(--red); border-color: var(--red);
                 box-shadow: 0 0 10px var(--red-glow);
             }
 
             /* ── Reveal screen ─────────────────────────────────── */
             #reveal {
-                position: absolute;
-                inset: 0;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                opacity: 0;
-                transition: opacity 2.8s ease;
+                position: absolute; inset: 0;
+                display: flex; flex-direction: column;
+                align-items: center; justify-content: flex-start;
+                padding: 8vh 6vw 6vw;
+                overflow-y: auto; -webkit-overflow-scrolling: touch;
+                opacity: 0; transition: opacity 2.8s ease;
             }
-            #reveal.on {
-                opacity: 1;
-                pointer-events: all;
-            }
+            #reveal.on { opacity: 1; pointer-events: all; }
             #reveal .cover-wrap {
-                width: clamp(140px, 22vw, 220px);
-                aspect-ratio: 1;
-                margin-bottom: 2rem;
+                width: clamp(110px, 28vw, 200px);
+                aspect-ratio: 1; flex-shrink: 0;
+                margin-bottom: 1.4rem;
                 border: 1px solid var(--red-dim);
-                box-shadow:
-                    0 0 30px rgba(200, 18, 0, 0.35),
-                    inset 0 0 10px rgba(0, 0, 0, 0.6);
+                box-shadow: 0 0 30px rgba(200,18,0,0.35), inset 0 0 10px rgba(0,0,0,0.6);
                 overflow: hidden;
             }
             #reveal .cover-wrap img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                display: block;
+                width: 100%; height: 100%; object-fit: cover; display: block;
                 filter: brightness(0.88) saturate(1.1);
             }
             #reveal h1 {
                 font-family: "Bebas Neue", sans-serif;
-                font-size: clamp(1.4rem, 5vw, 3.5rem);
-                letter-spacing: 0.38em;
-                line-height: 1.35;
-                text-align: center;
+                font-size: clamp(1.3rem, 6vw, 3.5rem);
+                letter-spacing: 0.32em; line-height: 1.3; text-align: center;
                 color: var(--red);
-                text-shadow:
-                    0 0 40px var(--red-glow),
-                    0 0 80px rgba(200, 20, 0, 0.3);
+                text-shadow: 0 0 40px var(--red-glow), 0 0 80px rgba(200,20,0,0.3);
             }
             #reveal .sub {
-                margin-top: 0.8rem;
-                font-family: "Cinzel", serif;
-                font-size: 0.65rem;
-                letter-spacing: 0.3em;
-                color: var(--red-dim);
+                margin-top: 0.6rem;
+                font-size: clamp(0.55rem, 1.8vw, 0.65rem);
+                letter-spacing: 0.25em; color: var(--red-dim); text-align: center;
             }
             #reveal .pct-line {
-                margin-top: 1.6rem;
+                margin-top: 1.2rem;
                 font-family: "Bebas Neue", sans-serif;
-                font-size: clamp(1.2rem, 3.5vw, 2.2rem);
-                letter-spacing: 0.3em;
-                text-align: center;
+                font-size: clamp(1rem, 5vw, 2.2rem);
+                letter-spacing: 0.25em; text-align: center;
             }
             #reveal .pct-line.gut {
                 color: #d4a830;
-                text-shadow:
-                    0 0 20px rgba(220, 170, 50, 0.8),
-                    0 0 50px rgba(200, 150, 30, 0.4);
+                text-shadow: 0 0 20px rgba(220,170,50,0.8), 0 0 50px rgba(200,150,30,0.4);
             }
             #reveal .pct-line.boese {
                 color: var(--red);
-                text-shadow:
-                    0 0 20px var(--red-glow),
-                    0 0 50px rgba(180, 0, 0, 0.35);
+                text-shadow: 0 0 20px var(--red-glow), 0 0 50px rgba(180,0,0,0.35);
             }
             #reveal .path {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin-top: 3rem;
-                font-size: 0.6rem;
-                letter-spacing: 0.22em;
-                font-family: "Cinzel", serif;
+                display: flex; flex-wrap: wrap; align-items: center;
+                justify-content: center; gap: 8px;
+                margin-top: 1.6rem;
+                font-size: clamp(0.5rem, 1.8vw, 0.6rem);
+                letter-spacing: 0.18em; font-family: "Cinzel", serif;
             }
             .path-node {
-                padding: 4px 18px;
-                border: 1px solid var(--red-dim);
-                color: var(--red);
-                box-shadow: 0 0 8px rgba(200, 18, 0, 0.2);
+                padding: 4px 14px;
+                border: 1px solid var(--red-dim); color: var(--red);
+                box-shadow: 0 0 8px rgba(200,18,0,0.2);
             }
-            .path-sep {
-                color: #3a0500;
-            }
+            .path-sep { color: #3a0500; }
             #reveal button {
-                margin-top: 3rem;
-                padding: 12px 52px;
-                border: 1px solid var(--red);
-                background: transparent;
-                color: var(--red);
-                font-family: "Cinzel", serif;
-                font-size: 0.65rem;
-                letter-spacing: 0.38em;
-                cursor: pointer;
-                transition:
-                    background 0.35s,
-                    color 0.35s,
-                    box-shadow 0.35s;
-                box-shadow: 0 0 12px rgba(200, 18, 0, 0.2);
+                margin-top: 2rem;
+                width: min(300px, 88%);
+                padding: 14px 20px;
+                border: 1px solid var(--red); background: transparent;
+                color: var(--red); font-family: "Cinzel", serif;
+                font-size: clamp(0.6rem, 2vw, 0.65rem);
+                letter-spacing: 0.35em; cursor: pointer;
+                transition: background 0.35s, color 0.35s, box-shadow 0.35s;
+                box-shadow: 0 0 12px rgba(200,18,0,0.2);
+                /* big touch target */
+                min-height: 48px;
             }
+            #reveal button:active,
             #reveal button:hover {
-                background: var(--red);
-                color: #000;
+                background: var(--red); color: #000;
                 box-shadow: 0 0 30px var(--red-glow);
+            }
+
+            /* ── Desktop enhancements ──────────────────────────── */
+            @media (min-width: 768px) {
+                .corner { width: 62px; height: 62px; }
+                #frame::before { inset: 13px; }
+                #frame::after  { inset: 21px; }
+                .corner.tl { top: 13px; left: 13px; }
+                .corner.tr { top: 13px; right: 13px; }
+                .corner.bl { bottom: 13px; left: 13px; }
+                .corner.br { bottom: 13px; right: 13px; }
+
+                #reveal { justify-content: center; padding: 0 6vw; }
+                #reveal .cover-wrap { margin-bottom: 2rem; }
+                #reveal .path { margin-top: 3rem; }
+                #reveal button { margin-top: 3rem; }
+                #lbl-l { left: 26%; }
+                #lbl-r { right: 26%; }
+            }
+
+            /* ── Landscape phone — keep reveal compact ─────────── */
+            @media (max-height: 500px) {
+                #reveal { flex-direction: row; flex-wrap: wrap; padding: 4vh 4vw; gap: 0 3vw; }
+                #reveal .cover-wrap { width: clamp(80px, 18vw, 130px); margin-bottom: 0; align-self: center; }
+                #reveal .pct-line { margin-top: 0.5rem; font-size: clamp(0.9rem, 4vw, 1.6rem); }
+                #reveal h1 { font-size: clamp(1rem, 4vw, 2rem); }
+                #reveal .sub { font-size: 0.5rem; }
             }
         </style>
     </head>
@@ -1062,11 +965,15 @@
                 renderer.render(scene, camera);
             })();
 
-            window.addEventListener("resize", () => {
+            function onResize() {
+                const portrait = innerHeight > innerWidth;
+                camera.fov = portrait ? 90 : 68;
                 camera.aspect = innerWidth / innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(innerWidth, innerHeight);
-            });
+            }
+            window.addEventListener("resize", onResize);
+            onResize();
         </script>
     </body>
 </html>
