@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>MM MM MISTER MONOPOL</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;600&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --red: #cc1500;
+                --red-dim: #6a0a00;
+                --red-glow: rgba(200, 20, 0, 0.75);
+                --red-faint: rgba(160, 15, 0, 0.35);
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                background: #000;
+                overflow: hidden;
+                font-family: "Cinzel", serif;
+                color: var(--red);
+            }
+
+            #canvas-wrap {
+                position: fixed;
+                inset: 0;
+            }
+
+            /* ── Vignette + UI layer ───────────────────────────── */
+            #ui {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 10;
+            }
+            #ui::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(
+                    ellipse at center,
+                    transparent 28%,
+                    rgba(0, 0, 0, 0.93) 100%
+                );
+                pointer-events: none;
+            }
+
+            /* ── Ornate frame ──────────────────────────────────── */
+            #frame {
+                position: fixed;
+                inset: 0;
+                z-index: 6;
+                pointer-events: none;
+            }
+            /* outer border line */
+            #frame::before {
+                content: "";
+                position: absolute;
+                inset: 13px;
+                border: 1px solid var(--red-faint);
+                box-shadow:
+                    0 0 22px rgba(200, 18, 0, 0.22),
+                    inset 0 0 22px rgba(200, 18, 0, 0.1);
+            }
+            /* inner echo border */
+            #frame::after {
+                content: "";
+                position: absolute;
+                inset: 21px;
+                border: 1px solid rgba(100, 8, 0, 0.28);
+            }
+            .corner {
+                position: absolute;
+                filter: drop-shadow(0 0 5px rgba(200, 20, 0, 0.7));
+            }
+            .corner.tl {
+                top: 13px;
+                left: 13px;
+            }
+            .corner.tr {
+                top: 13px;
+                right: 13px;
+            }
+            .corner.bl {
+                bottom: 13px;
+                left: 13px;
+            }
+            .corner.br {
+                bottom: 13px;
+                right: 13px;
+            }
+
+            /* ── Intro / Disclaimer ────────────────────────────── */
+            #intro {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0;
+                pointer-events: all;
+                cursor: pointer;
+                transition: opacity 1.8s ease;
+            }
+            #intro .disclaimer {
+                font-family: "Cinzel", serif;
+                font-size: 0.62rem;
+                letter-spacing: 0.5em;
+                color: var(--red-dim);
+                margin-bottom: 1.6rem;
+                animation: breathe 3s ease-in-out infinite;
+            }
+            #intro h1 {
+                font-family: "Bebas Neue", sans-serif;
+                font-size: clamp(1.8rem, 5.5vw, 4rem);
+                letter-spacing: 0.3em;
+                text-align: center;
+                line-height: 1.4;
+                color: var(--red);
+                text-shadow:
+                    0 0 30px var(--red-glow),
+                    0 0 60px rgba(200, 20, 0, 0.35);
+                animation: breathe 2.8s ease-in-out infinite;
+            }
+            #intro .body {
+                margin-top: 1.4rem;
+                font-family: "Cinzel", serif;
+                font-size: clamp(0.7rem, 1.6vw, 0.95rem);
+                letter-spacing: 0.22em;
+                text-align: center;
+                line-height: 2;
+                color: #7a1500;
+            }
+            #intro .cta {
+                margin-top: 3rem;
+                font-size: 0.58rem;
+                letter-spacing: 0.55em;
+                color: #3a0800;
+                animation: breathe 2.8s ease-in-out infinite 1.4s;
+            }
+            @keyframes breathe {
+                0%,
+                100% {
+                    opacity: 0.45;
+                }
+                50% {
+                    opacity: 1;
+                }
+            }
+
+            /* ── Lyric overlay ─────────────────────────────────── */
+            #lyric {
+                position: absolute;
+                bottom: 13%;
+                left: 50%;
+                transform: translateX(-50%);
+                font-family: "Cinzel", serif;
+                font-size: clamp(0.8rem, 2.2vw, 1.15rem);
+                letter-spacing: 0.28em;
+                text-align: center;
+                white-space: nowrap;
+                color: var(--red);
+                text-shadow: 0 0 24px var(--red-glow);
+                opacity: 0;
+                transition: opacity 0.9s ease;
+            }
+
+            /* ── Choice UI ─────────────────────────────────────── */
+            #choice-prompt {
+                position: absolute;
+                top: 10%;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 0.58rem;
+                letter-spacing: 0.55em;
+                color: var(--red-dim);
+                opacity: 0;
+                transition: opacity 0.9s;
+            }
+            .door-label {
+                position: absolute;
+                font-size: clamp(1.8rem, 4.5vw, 3.5rem);
+                opacity: 0;
+                transition: opacity 0.8s;
+                text-align: center;
+                pointer-events: none;
+            }
+            /* GUT — holy: warm gold, Cinzel */
+            #lbl-l {
+                top: 7%;
+                left: 26%;
+                transform: translateX(-50%);
+                font-family: "Cinzel", serif;
+                font-weight: 600;
+                letter-spacing: 0.18em;
+                color: #d4a830;
+                text-shadow:
+                    0 0 18px rgba(220, 170, 50, 0.95),
+                    0 0 40px rgba(200, 150, 30, 0.55),
+                    0 0 70px rgba(180, 130, 10, 0.25);
+            }
+            /* BÖSE — evil: blood red, Bebas Neue */
+            #lbl-r {
+                top: 7%;
+                right: 26%;
+                transform: translateX(50%);
+                font-family: "Bebas Neue", sans-serif;
+                letter-spacing: 0.06em;
+                color: #cc0000;
+                text-shadow:
+                    0 0 16px rgba(220, 0, 0, 0.95),
+                    0 0 36px rgba(180, 0, 0, 0.6),
+                    0 0 70px rgba(140, 0, 0, 0.3);
+            }
+
+            /* ── Sigil pips ────────────────────────────────────── */
+            #pips {
+                position: absolute;
+                top: 28px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 22px;
+                opacity: 0;
+                transition: opacity 0.6s;
+                z-index: 20;
+            }
+            .pip {
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                border: 1px solid #2a0400;
+            }
+            .pip.lit {
+                background: var(--red);
+                border-color: var(--red);
+                box-shadow: 0 0 10px var(--red-glow);
+            }
+
+            /* ── Reveal screen ─────────────────────────────────── */
+            #reveal {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 2.8s ease;
+            }
+            #reveal.on {
+                opacity: 1;
+                pointer-events: all;
+            }
+            #reveal .cover-wrap {
+                width: clamp(140px, 22vw, 220px);
+                aspect-ratio: 1;
+                margin-bottom: 2rem;
+                border: 1px solid var(--red-dim);
+                box-shadow:
+                    0 0 30px rgba(200, 18, 0, 0.35),
+                    inset 0 0 10px rgba(0, 0, 0, 0.6);
+                overflow: hidden;
+            }
+            #reveal .cover-wrap img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                filter: brightness(0.88) saturate(1.1);
+            }
+            #reveal h1 {
+                font-family: "Bebas Neue", sans-serif;
+                font-size: clamp(1.4rem, 5vw, 3.5rem);
+                letter-spacing: 0.38em;
+                line-height: 1.35;
+                text-align: center;
+                color: var(--red);
+                text-shadow:
+                    0 0 40px var(--red-glow),
+                    0 0 80px rgba(200, 20, 0, 0.3);
+            }
+            #reveal .sub {
+                margin-top: 0.8rem;
+                font-family: "Cinzel", serif;
+                font-size: 0.65rem;
+                letter-spacing: 0.3em;
+                color: var(--red-dim);
+            }
+            #reveal .pct-line {
+                margin-top: 1.6rem;
+                font-family: "Bebas Neue", sans-serif;
+                font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+                letter-spacing: 0.3em;
+                text-align: center;
+            }
+            #reveal .pct-line.gut {
+                color: #d4a830;
+                text-shadow:
+                    0 0 20px rgba(220, 170, 50, 0.8),
+                    0 0 50px rgba(200, 150, 30, 0.4);
+            }
+            #reveal .pct-line.boese {
+                color: var(--red);
+                text-shadow:
+                    0 0 20px var(--red-glow),
+                    0 0 50px rgba(180, 0, 0, 0.35);
+            }
+            #reveal .path {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 3rem;
+                font-size: 0.6rem;
+                letter-spacing: 0.22em;
+                font-family: "Cinzel", serif;
+            }
+            .path-node {
+                padding: 4px 18px;
+                border: 1px solid var(--red-dim);
+                color: var(--red);
+                box-shadow: 0 0 8px rgba(200, 18, 0, 0.2);
+            }
+            .path-sep {
+                color: #3a0500;
+            }
+            #reveal button {
+                margin-top: 3rem;
+                padding: 12px 52px;
+                border: 1px solid var(--red);
+                background: transparent;
+                color: var(--red);
+                font-family: "Cinzel", serif;
+                font-size: 0.65rem;
+                letter-spacing: 0.38em;
+                cursor: pointer;
+                transition:
+                    background 0.35s,
+                    color 0.35s,
+                    box-shadow 0.35s;
+                box-shadow: 0 0 12px rgba(200, 18, 0, 0.2);
+            }
+            #reveal button:hover {
+                background: var(--red);
+                color: #000;
+                box-shadow: 0 0 30px var(--red-glow);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="canvas-wrap"></div>
+
+        <!-- Ornate frame overlay -->
+        <div id="frame" aria-hidden="true">
+            <!-- Top-left -->
+            <svg
+                class="corner tl"
+                width="62"
+                height="62"
+                viewBox="0 0 62 62"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <polyline
+                    points="0,61 0,0 61,0"
+                    stroke="#bb1400"
+                    stroke-width="1.5"
+                />
+                <polyline
+                    points="7,54 7,7 54,7"
+                    stroke="#bb1400"
+                    stroke-width="0.7"
+                    opacity="0.38"
+                />
+                <line
+                    x1="24"
+                    y1="0"
+                    x2="24"
+                    y2="7"
+                    stroke="#bb1400"
+                    stroke-width="0.9"
+                />
+                <line
+                    x1="0"
+                    y1="24"
+                    x2="7"
+                    y2="24"
+                    stroke="#bb1400"
+                    stroke-width="0.9"
+                />
+                <rect
+                    x="1"
+                    y="1"
+                    width="5"
+                    height="5"
+                    stroke="#bb1400"
+                    stroke-width="0.7"
+                    opacity="0.5"
+                />
+            </svg>
+            <!-- Top-right -->
+            <svg
+                class="corner tr"
+                width="62"
+                height="62"
+                viewBox="0 0 62 62"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <polyline
+                    points="62,61 62,0 1,0"
+                    stroke="#bb1400"
+                    stroke-width="1.5"
+                />
+                <polyline
+                    points="55,54 55,7 8,7"
+                    stroke="#bb1400"
+                    stroke-width="0.7"
+                    opacity="0.38"
+                />
+                <line
+                    x1="38"
+                    y1="0"
+                    x2="38"
+                    y2="7"
+                    stroke="#bb1400"
+                    stroke-width="0.9"
+                />
+                <line
+                    x1="55"
+                    y1="24"
+                    x2="62"
+                    y2="24"
+                    stroke="#bb1400"
+                    stroke-width="0.9"
+                />
+                <rect
+                    x="56"
+                    y="1"
+                    width="5"
+                    height="5"
+                    stroke="#bb1400"
+                    stroke-width="0.7"
+                    opacity="0.5"
+                />
+            </svg>
+            <!-- Bottom-left -->
+            <svg
+                class="corner bl"
+                width="62"
+                height="62"
+                viewBox="0 0 62 62"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <polyline
+                    points="0,1 0,62 61,62"
+                    stroke="#bb1400"
+                    stroke-width="1.5"
+                />
+                <polyline
+                    points="7,8 7,55 54,55"
+                    stroke="#bb1400"
+                    stroke-width="0.7"
+                    opacity="0.38"
+                />
+                <line
+                    x1="24"
+                    y1="55"
+                    x2="24"
+                    y2="62"
+                    stroke="#bb1400"
+                    stroke-width="0.9"
+                />
+                <line
+                    x1="0"
+                    y1="38"
+                    x2="7"
+                    y2="38"
+                    stroke="#bb1400"
+                    stroke-width="0.9"
+                />
+                <rect
+                    x="1"
+                    y="56"
+                    width="5"
+                    height="5"
+                    stroke="#bb1400"
+                    stroke-width="0.7"
+                    opacity="0.5"
+                />
+            </svg>
+            <!-- Bottom-right -->
+            <svg
+                class="corner br"
+                width="62"
+                height="62"
+                viewBox="0 0 62 62"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <polyline
+                    points="62,1 62,62 1,62"
+                    stroke="#bb1400"
+                    stroke-width="1.5"
+                />
+                <polyline
+                    points="55,8 55,55 8,55"
+                    stroke="#bb1400"
+                    stroke-width="0.7"
+                    opacity="0.38"
+                />
+                <line
+                    x1="38"
+                    y1="55"
+                    x2="38"
+                    y2="62"
+                    stroke="#bb1400"
+                    stroke-width="0.9"
+                />
+                <line
+                    x1="55"
+                    y1="38"
+                    x2="62"
+                    y2="38"
+                    stroke="#bb1400"
+                    stroke-width="0.9"
+                />
+                <rect
+                    x="56"
+                    y="56"
+                    width="5"
+                    height="5"
+                    stroke="#bb1400"
+                    stroke-width="0.7"
+                    opacity="0.5"
+                />
+            </svg>
+        </div>
+
+        <div id="ui">
+            <div id="intro">
+                <p class="disclaimer">— MISTER MONOPOL —</p>
+                <h1>BIST DU BEREIT<br />DEINEN WEG ZU WÄHLEN?</h1>
+                <p class="body">Hör zu.<br />Tritt durch die Türen.</p>
+                <p class="cta">[ KLICKE UM EINZUTRETEN ]</p>
+            </div>
+
+            <div id="lyric"></div>
+            <div id="choice-prompt">WÄHLE DEINEN WEG</div>
+            <div id="lbl-l" class="door-label"></div>
+            <div id="lbl-r" class="door-label"></div>
+
+            <div id="pips">
+                <div class="pip" id="p0"></div>
+                <div class="pip" id="p1"></div>
+                <div class="pip" id="p2"></div>
+            </div>
+
+            <div id="reveal">
+                <div class="cover-wrap">
+                    <img
+                        src="cover.jpg"
+                        alt="Der Meister Hat Den Weg — Mister Monopol"
+                    />
+                </div>
+                <h1>DER MEISTER<br />HAT DEN WEG</h1>
+                <div class="sub">dein weg war der einzig mögliche</div>
+                <div class="pct-line" id="pct-line"></div>
+                <div class="path" id="path"></div>
+                <button onclick="share()">TEILE DEINEN WEG</button>
+            </div>
+        </div>
+
+        <script type="module">
+            import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
+
+            // ── Audio ─────────────────────────────────────────────────────────────────────
+
+            const audio = new Audio("mp3_meistermaster.mp3");
+            audio.loop = true;
+            audio.volume = 0;
+
+            function fadeInAudio() {
+                audio.currentTime = 33;
+                audio.play().catch(() => {});
+                const step = () => {
+                    if (audio.volume < 0.82) {
+                        audio.volume = Math.min(audio.volume + 0.018, 0.82);
+                        setTimeout(step, 120);
+                    }
+                };
+                step();
+            }
+
+            // ── Scene config ──────────────────────────────────────────────────────────────
+
+            const CW = 5,
+                CH = 3.5,
+                SEG = 22;
+
+            const STEPS = [
+                {
+                    lyric: "DU HAST GEWARTET",
+                    left: { name: "GEDULD", hex: 0x660000 },
+                    right: { name: "DRANG", hex: 0xaa2200 },
+                },
+                {
+                    lyric: "ALLES FÜGT SICH",
+                    left: { name: "ORDNUNG", hex: 0x440000 },
+                    right: { name: "CHAOS", hex: 0x880d00 },
+                },
+                {
+                    lyric: "ES IST NICHT ZU SPÄT",
+                    left: { name: "LICHT", hex: 0xcc3300 },
+                    right: { name: "DUNKEL", hex: 0x220000 },
+                },
+            ];
+
+            const DOOR_Z = [1, 2, 3].map((i) => -(SEG * i * 0.55));
+
+            // ── Runtime state ─────────────────────────────────────────────────────────────
+
+            let phase = "intro";
+            let step = 0;
+            let camZ = 0,
+                targetZ = 0;
+            let picked = [];
+            let sides = []; // 0 = holy/left, 1 = evil/right
+            let doors = [];
+            let candleLights = [];
+            let hovered = null;
+
+            // ── Three.js bootstrap ────────────────────────────────────────────────────────
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            document
+                .getElementById("canvas-wrap")
+                .appendChild(renderer.domElement);
+
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x020000, 0.054);
+
+            const camera = new THREE.PerspectiveCamera(
+                68,
+                innerWidth / innerHeight,
+                0.1,
+                90,
+            );
+            camera.position.set(0, 1.65, 0);
+
+            scene.add(new THREE.AmbientLight(0x1a0000, 0.55));
+
+            // ── Sigil canvas texture ──────────────────────────────────────────────────────
+
+            function makeSigilTexture(hex) {
+                const sz = 256;
+                const cv = document.createElement("canvas");
+                cv.width = cv.height = sz;
+                const g = cv.getContext("2d");
+                g.fillStyle = "#060100";
+                g.fillRect(0, 0, sz, sz);
+
+                const col = "#" + hex.toString(16).padStart(6, "0");
+                g.strokeStyle = col;
+                g.fillStyle = col;
+                g.lineWidth = 1;
+                g.globalAlpha = 0.55;
+
+                const cx = sz / 2,
+                    cy = sz / 2,
+                    r = 100;
+
+                g.beginPath();
+                g.arc(cx, cy, r, 0, Math.PI * 2);
+                g.stroke();
+                g.beginPath();
+                g.arc(cx, cy, 32, 0, Math.PI * 2);
+                g.stroke();
+
+                for (let a = 0; a < 6; a++) {
+                    const angle = (a / 6) * Math.PI * 2;
+                    g.beginPath();
+                    g.moveTo(
+                        cx + Math.cos(angle) * 32,
+                        cy + Math.sin(angle) * 32,
+                    );
+                    g.lineTo(
+                        cx + Math.cos(angle) * r,
+                        cy + Math.sin(angle) * r,
+                    );
+                    g.stroke();
+                    g.beginPath();
+                    g.arc(
+                        cx + Math.cos(angle) * r,
+                        cy + Math.sin(angle) * r,
+                        4,
+                        0,
+                        Math.PI * 2,
+                    );
+                    g.fill();
+                }
+
+                g.globalAlpha = 0.22;
+                [
+                    [30, 128, 226, 128],
+                    [128, 30, 128, 226],
+                    [53, 53, 203, 203],
+                    [203, 53, 53, 203],
+                ].forEach(([x1, y1, x2, y2]) => {
+                    g.beginPath();
+                    g.moveTo(x1, y1);
+                    g.lineTo(x2, y2);
+                    g.stroke();
+                });
+
+                const t = new THREE.CanvasTexture(cv);
+                t.wrapS = t.wrapT = THREE.RepeatWrapping;
+                t.repeat.set(2.8, 2.8);
+                return t;
+            }
+
+            // ── Corridor ──────────────────────────────────────────────────────────────────
+
+            function addCorridor(zFrom, zTo) {
+                const len = Math.abs(zTo - zFrom);
+                const midZ = (zFrom + zTo) / 2;
+                const darkMat = new THREE.MeshLambertMaterial({
+                    color: 0x0c0202,
+                });
+                const floorMat = new THREE.MeshLambertMaterial({
+                    color: 0x0e0404,
+                    map: makeSigilTexture(0x6a0000),
+                });
+
+                const plane = (w, h, mat, x, y, z, rx, ry) => {
+                    const m = new THREE.Mesh(
+                        new THREE.PlaneGeometry(w, h),
+                        mat,
+                    );
+                    m.rotation.set(rx, ry, 0);
+                    m.position.set(x, y, z);
+                    scene.add(m);
+                };
+
+                plane(CW, len, floorMat, 0, 0, midZ, -Math.PI / 2, 0);
+                plane(CW, len, darkMat, 0, CH, midZ, Math.PI / 2, 0);
+                plane(len, CH, darkMat, -CW / 2, CH / 2, midZ, 0, Math.PI / 2);
+                plane(len, CH, darkMat, CW / 2, CH / 2, midZ, 0, -Math.PI / 2);
+
+                [0.3, 0.7].forEach((t) => {
+                    const cz = zFrom + (zTo - zFrom) * t;
+                    [-CW / 2 + 0.28, CW / 2 - 0.28].forEach((cx) => {
+                        const fl = new THREE.PointLight(0xff1800, 1.0, 8);
+                        fl.position.set(cx, 0.35, cz);
+                        scene.add(fl);
+                        candleLights.push(fl);
+
+                        const candle = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.03, 0.03, 0.28, 6),
+                            new THREE.MeshLambertMaterial({ color: 0xd0b070 }),
+                        );
+                        candle.position.set(cx, 0.14, cz);
+                        scene.add(candle);
+                    });
+                });
+            }
+
+            for (let i = 0; i < 4; i++) addCorridor(-i * SEG, -(i + 1) * SEG);
+
+            // ── Door textures (preload) ───────────────────────────────────────────────────
+
+            const texLoader = new THREE.TextureLoader();
+            function loadDoorTex(url) {
+                const t = texLoader.load(url);
+                t.magFilter = THREE.LinearFilter;
+                t.minFilter = THREE.LinearMipmapLinearFilter;
+                t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                return t;
+            }
+            const holyTex = loadDoorTex("holydoor.jpg");
+            const evilTex = loadDoorTex("eevildoort.jpg");
+
+            // ── Doors ─────────────────────────────────────────────────────────────────────
+
+            // left (i=0) = holy/GUT, right (i=1) = evil/BÖSE — always
+            function spawnDoors(zPos) {
+                doors = [];
+                const fH = 2.7,
+                    fW = 1.5;
+
+                [
+                    {
+                        x: -CW / 4,
+                        i: 0,
+                        tex: holyTex,
+                        emissiveColor: 0xffffff,
+                        glowColor: 0xd4a820,
+                    },
+                    {
+                        x: CW / 4,
+                        i: 1,
+                        tex: evilTex,
+                        emissiveColor: 0xffffff,
+                        glowColor: 0xcc0000,
+                    },
+                ].forEach(({ x, i, tex, glowColor }) => {
+                    const mat = new THREE.MeshBasicMaterial({
+                        map: tex,
+                    });
+                    const mesh = new THREE.Mesh(
+                        new THREE.BoxGeometry(fW, fH, 0.1),
+                        mat,
+                    );
+                    mesh.position.set(x, fH / 2, zPos);
+                    mesh.userData = { i, glowColor, glowAmt: 0 };
+                    scene.add(mesh);
+
+                    const glow = new THREE.PointLight(glowColor, 0, 5);
+                    glow.position.set(x, fH * 0.8, zPos - 0.8);
+                    scene.add(glow);
+                    mesh.userData.glow = glow;
+
+                    doors.push(mesh);
+                });
+            }
+
+            // ── Raycasting ────────────────────────────────────────────────────────────────
+
+            const ray = new THREE.Raycaster();
+            const ptr = new THREE.Vector2();
+
+            function updatePointer(cx, cy) {
+                ptr.set((cx / innerWidth) * 2 - 1, -(cy / innerHeight) * 2 + 1);
+            }
+
+            renderer.domElement.addEventListener("mousemove", (e) => {
+                updatePointer(e.clientX, e.clientY);
+                if (phase !== "choose") {
+                    hovered = null;
+                    renderer.domElement.style.cursor = "default";
+                    return;
+                }
+                ray.setFromCamera(ptr, camera);
+                const hits = ray.intersectObjects(doors);
+                hovered = hits.length ? hits[0].object : null;
+                renderer.domElement.style.cursor = hovered
+                    ? "pointer"
+                    : "default";
+            });
+
+            renderer.domElement.addEventListener("click", () => {
+                if (phase === "choose" && hovered)
+                    chooseDoor(hovered.userData.i);
+            });
+
+            renderer.domElement.addEventListener(
+                "touchstart",
+                (e) => {
+                    const t = e.touches[0];
+                    updatePointer(t.clientX, t.clientY);
+                    ray.setFromCamera(ptr, camera);
+                    const hits = ray.intersectObjects(doors);
+                    if (phase === "choose" && hits.length)
+                        chooseDoor(hits[0].object.userData.i);
+                    e.preventDefault();
+                },
+                { passive: false },
+            );
+
+            // ── UI helpers ────────────────────────────────────────────────────────────────
+
+            const lyricEl = document.getElementById("lyric");
+            const promptEl = document.getElementById("choice-prompt");
+            const lblL = document.getElementById("lbl-l");
+            const lblR = document.getElementById("lbl-r");
+
+            function showLyric(text, fadeAfter = 0) {
+                lyricEl.textContent = text;
+                lyricEl.style.opacity = 1;
+                if (fadeAfter > 0)
+                    setTimeout(() => (lyricEl.style.opacity = 0), fadeAfter);
+            }
+
+            function showChoiceUI() {
+                const s = STEPS[step];
+                promptEl.style.opacity = 1;
+                lblL.textContent = s.left.name;
+                lblL.style.opacity = 1;
+                lblR.textContent = s.right.name;
+                lblR.style.opacity = 1;
+            }
+
+            function hideChoiceUI() {
+                promptEl.style.opacity = 0;
+                lblL.style.opacity = 0;
+                lblR.style.opacity = 0;
+            }
+
+            function litPip(i) {
+                document.getElementById(`p${i}`).classList.add("lit");
+            }
+
+            // ── Game flow ─────────────────────────────────────────────────────────────────
+
+            function startGame() {
+                const intro = document.getElementById("intro");
+                intro.style.opacity = 0;
+                fadeInAudio();
+                setTimeout(() => {
+                    intro.style.display = "none";
+                    document.getElementById("pips").style.opacity = 1;
+                    showLyric("DEINE ZEIT IST GEKOMMEN", 2600);
+                    setTimeout(() => {
+                        spawnDoors(DOOR_Z[0]);
+                        targetZ = DOOR_Z[0] + 3.8;
+                        phase = "walk";
+                    }, 700);
+                }, 1600);
+            }
+
+            function chooseDoor(idx) {
+                const s = STEPS[step];
+                picked.push(idx === 0 ? s.left : s.right);
+                sides.push(idx);
+                litPip(step);
+                hideChoiceUI();
+                lyricEl.style.opacity = 0;
+
+                doors.forEach((d) => {
+                    scene.remove(d.userData.glow);
+                    scene.remove(d);
+                });
+                doors = [];
+                hovered = null;
+
+                step++;
+                phase = "walk";
+
+                if (step < 3) {
+                    showLyric(s.lyric, 2400);
+                    targetZ = DOOR_Z[step] + 3.8;
+                    setTimeout(() => {
+                        spawnDoors(DOOR_Z[step]);
+                    }, 500);
+                } else {
+                    showLyric("DER MEISTER HAT DEN WEG");
+                    targetZ = DOOR_Z[2] - SEG * 0.55;
+                    phase = "final";
+                    setTimeout(showReveal, 4200);
+                }
+            }
+
+            function showReveal() {
+                phase = "done";
+                lyricEl.style.opacity = 0;
+
+                // Percentage line
+                const gutCount = sides.filter((s) => s === 0).length;
+                const boeseCount = 3 - gutCount;
+                const dominant = gutCount >= boeseCount ? "gut" : "boese";
+                const pct = Math.round(
+                    (Math.max(gutCount, boeseCount) / 3) * 100,
+                );
+                const label = dominant === "gut" ? "GUT" : "BÖSE";
+                const pctEl = document.getElementById("pct-line");
+                pctEl.textContent = `DU WÄHLTEST ${pct}% ${label}`;
+                pctEl.classList.add(dominant);
+
+                const pathEl = document.getElementById("path");
+                picked.forEach((p, i) => {
+                    const node = document.createElement("span");
+                    node.className = "path-node";
+                    node.textContent = p.name;
+                    pathEl.appendChild(node);
+                    if (i < 2) {
+                        const sep = document.createElement("span");
+                        sep.className = "path-sep";
+                        sep.textContent = "→";
+                        pathEl.appendChild(sep);
+                    }
+                });
+
+                document.getElementById("reveal").classList.add("on");
+            }
+
+            window.share = function () {
+                const path = picked.map((p) => p.name).join(" → ");
+                const text = `Mein Weg: ${path}\n"Alle Wege führen zum Meister."\n\n#MisterMonopol #DerMeisterHatDenWeg`;
+                if (navigator.share) {
+                    navigator.share({
+                        title: "MM MM MISTER MONOPOL",
+                        text,
+                        url: location.href,
+                    });
+                } else {
+                    navigator.clipboard
+                        .writeText(text + "\n" + location.href)
+                        .then(() => alert("In Zwischenablage kopiert!"));
+                }
+            };
+
+            document
+                .getElementById("intro")
+                .addEventListener("click", startGame);
+
+            // ── Render loop ───────────────────────────────────────────────────────────────
+
+            const clock = new THREE.Clock();
+
+            (function loop() {
+                requestAnimationFrame(loop);
+                const dt = clock.getDelta();
+                const t = clock.elapsedTime;
+
+                if (phase === "walk" || phase === "final") {
+                    const diff = targetZ - camZ;
+                    camZ += diff * Math.min(dt * 1.9, 0.09);
+                    if (phase === "walk" && Math.abs(diff) < 0.06) {
+                        camZ = targetZ;
+                        phase = "choose";
+                        showLyric(STEPS[step].lyric);
+                        showChoiceUI();
+                    }
+                }
+
+                const walking = phase === "walk" || phase === "final";
+                camera.position.z = camZ;
+                camera.position.y =
+                    1.65 + Math.sin(t * 1.75) * (walking ? 0.024 : 0.007);
+                camera.position.x = Math.sin(t * 0.87) * (walking ? 0.011 : 0);
+
+                doors.forEach((d) => {
+                    const targetBrightness = d === hovered ? 1.25 : 1.0;
+                    const cur = d.material.color.r;
+                    const next = THREE.MathUtils.lerp(cur, targetBrightness, 0.09);
+                    d.material.color.setScalar(next);
+                    const wantGlow = d === hovered ? 1.2 : 0;
+                    d.userData.glowAmt = THREE.MathUtils.lerp(d.userData.glowAmt, wantGlow, 0.09);
+                    d.userData.glow.intensity = d.userData.glowAmt;
+                });
+
+                candleLights.forEach((l, i) => {
+                    l.intensity =
+                        0.9 +
+                        Math.sin(t * 5.9 + i * 2.3) * 0.22 +
+                        Math.sin(t * 13.1 + i * 0.7) * 0.09;
+                });
+
+                renderer.render(scene, camera);
+            })();
+
+            window.addEventListener("resize", () => {
+                camera.aspect = innerWidth / innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(innerWidth, innerHeight);
+            });
+        </script>
+    </body>
+</html>
