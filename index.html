@@ -608,6 +608,7 @@
             let picked = [];
             let sides = [];
             let candleLights = [];
+            let shareBlob = null;
 
             // ── Three.js bootstrap ────────────────────────────────────────────────────────
 
@@ -850,28 +851,31 @@
                 });
 
                 document.getElementById("reveal").classList.add("on");
+
+                // Pre-render screenshot so share() can use it synchronously
+                setTimeout(() => {
+                    if (typeof html2canvas !== "undefined") {
+                        html2canvas(document.getElementById("reveal"), {
+                            backgroundColor: "#000000", scale: 2,
+                            useCORS: true, logging: false,
+                        }).then((c) => c.toBlob((b) => { shareBlob = b; }, "image/png"))
+                          .catch(() => {});
+                    }
+                }, 800);
             }
 
-            window.share = async function () {
+            window.share = function () {
                 const path = picked.map((p) => p.name).join(" → ");
                 const text = `Mein Weg: ${path}\n"Alle Wege führen zum Meister."\n\n#MisterMonopol #DerMeisterHatDenWeg`;
                 const url = "https://music.monopol-ai.de/weg";
 
-                try {
-                    const canvas = await html2canvas(document.getElementById("reveal"), {
-                        backgroundColor: "#000000",
-                        scale: 2,
-                        useCORS: true,
-                        logging: false,
-                    });
-                    const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
-                    const file = new File([blob], "mein-weg.png", { type: "image/png" });
-
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({ title: "DER MEISTER HAT DEN WEG", text, files: [file], url });
+                if (shareBlob && navigator.canShare) {
+                    const file = new File([shareBlob], "mein-weg.png", { type: "image/png" });
+                    if (navigator.canShare({ files: [file] })) {
+                        navigator.share({ title: "DER MEISTER HAT DEN WEG", text, files: [file], url });
                         return;
                     }
-                } catch (e) {}
+                }
 
                 if (navigator.share) {
                     navigator.share({ title: "DER MEISTER HAT DEN WEG", text, url });
