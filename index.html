@@ -9,7 +9,6 @@
             href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;600&display=swap"
             rel="stylesheet"
         />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
         <style>
             :root {
                 --red: #cc1500;
@@ -817,7 +816,7 @@
                     showLyric("DER MEISTER HAT DEN WEG");
                     targetZ = DOOR_Z[2] - SEG * 0.55;
                     phase = "final";
-                    setTimeout(showReveal, 4200);
+                    setTimeout(showReveal, 2600);
                 }
             }
 
@@ -852,14 +851,22 @@
 
                 document.getElementById("reveal").classList.add("on");
 
-                // Pre-render screenshot so share() can use it synchronously
+                // Dynamically load html2canvas then pre-render screenshot
                 setTimeout(() => {
-                    if (typeof html2canvas !== "undefined") {
+                    const doCapture = () => {
                         html2canvas(document.getElementById("reveal"), {
                             backgroundColor: "#000000", scale: 2,
                             useCORS: true, logging: false,
                         }).then((c) => c.toBlob((b) => { shareBlob = b; }, "image/png"))
                           .catch(() => {});
+                    };
+                    if (typeof html2canvas !== "undefined") {
+                        doCapture();
+                    } else {
+                        const s = document.createElement("script");
+                        s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+                        s.onload = doCapture;
+                        document.head.appendChild(s);
                     }
                 }, 800);
             }
