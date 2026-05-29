@@ -8,7 +8,9 @@
       "Bash(git push *)",
       "Bash(git remote *)",
       "Bash(git commit *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(Start-Process python *)",
+      "PowerShell(Stop-Process -Name python -Force -ErrorAction SilentlyContinue)"
     ]
   }
 }

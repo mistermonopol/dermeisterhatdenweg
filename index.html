@@ -24,7 +24,6 @@
                 overflow: hidden;
                 font-family: "Cinzel", serif;
                 color: var(--red);
-                /* prevent iOS tap highlight */
                 -webkit-tap-highlight-color: transparent;
             }
 
@@ -113,32 +112,62 @@
                 opacity: 0; transition: opacity 0.9s ease;
             }
 
-            /* ── Choice UI ─────────────────────────────────────── */
-            #choice-prompt {
-                position: absolute; top: 9%; left: 50%; transform: translateX(-50%);
-                font-size: clamp(0.5rem, 1.8vw, 0.58rem);
-                letter-spacing: 0.45em; color: var(--red-dim);
-                opacity: 0; transition: opacity 0.9s; white-space: nowrap;
+            /* ── Door choice screen (2D overlay) ───────────────── */
+            #door-screen {
+                position: absolute; inset: 0;
+                display: flex; flex-direction: column;
+                align-items: center; justify-content: center;
+                padding: 3vh 0; gap: 1.5vh;
+                background: rgba(0,0,0,0.92);
+                opacity: 0; transition: opacity 0.5s ease;
+                pointer-events: none;
             }
-            .door-label {
-                position: absolute;
-                font-size: clamp(1.4rem, 6vw, 3.5rem);
-                opacity: 0; transition: opacity 0.8s;
-                text-align: center; pointer-events: none;
+            #door-screen.on { opacity: 1; pointer-events: all; }
+            #door-main {
+                display: flex; align-items: center;
+                width: 100%; flex: 1; min-height: 0;
+                gap: 2vw; padding: 0 2vw;
             }
-            /* Holy — warm gold, Cinzel */
-            #lbl-l {
-                top: 6%; left: 22%; transform: translateX(-50%);
+            .door-side {
+                flex: 1;
+                font-family: "Cinzel", serif; font-weight: 600;
+                font-size: clamp(1rem, 2.5vw, 1.6rem);
+                letter-spacing: 0.06em; line-height: 1.7;
+                color: var(--red); text-align: center;
+                text-shadow: 0 0 12px var(--red-glow);
+                white-space: pre-line;
+            }
+            .door-item {
+                flex: 0 0 27%; display: flex; flex-direction: column;
+                align-items: center; gap: 0.8rem;
+                cursor: pointer; min-width: 0;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .door-item:active { opacity: 0.8; }
+            .door-item-label {
+                font-size: clamp(1.5rem, 6.5vw, 3.5rem);
+                text-align: center; flex-shrink: 0;
+            }
+            #door-lbl-l {
                 font-family: "Cinzel", serif; font-weight: 600;
                 letter-spacing: 0.12em; color: #d4a830;
                 text-shadow: 0 0 18px rgba(220,170,50,0.95), 0 0 40px rgba(200,150,30,0.55);
             }
-            /* Evil — blood red, Bebas Neue */
-            #lbl-r {
-                top: 6%; right: 22%; transform: translateX(50%);
+            #door-lbl-r {
                 font-family: "Bebas Neue", sans-serif;
                 letter-spacing: 0.06em; color: #cc0000;
                 text-shadow: 0 0 16px rgba(220,0,0,0.95), 0 0 36px rgba(180,0,0,0.6);
+            }
+            .door-item img {
+                width: 100%; flex: 1; min-height: 0;
+                object-fit: contain; display: block;
+            }
+            #door-screen-lyric {
+                font-family: "Cinzel", serif;
+                font-size: clamp(1rem, 2.8vw, 1.5rem);
+                letter-spacing: 0.25em; text-align: center;
+                color: var(--red); flex-shrink: 0;
+                text-shadow: 0 0 24px var(--red-glow);
             }
 
             /* ── Sigil pips ────────────────────────────────────── */
@@ -167,7 +196,7 @@
             }
             #reveal.on { opacity: 1; pointer-events: all; }
             #reveal .cover-wrap {
-                width: clamp(110px, 28vw, 200px);
+                width: clamp(160px, 48vw, 240px);
                 aspect-ratio: 1; flex-shrink: 0;
                 margin-bottom: 1.4rem;
                 border: 1px solid var(--red-dim);
@@ -180,7 +209,7 @@
             }
             #reveal h1 {
                 font-family: "Bebas Neue", sans-serif;
-                font-size: clamp(1.3rem, 6vw, 3.5rem);
+                font-size: clamp(2rem, 9vw, 3.5rem);
                 letter-spacing: 0.32em; line-height: 1.3; text-align: center;
                 color: var(--red);
                 text-shadow: 0 0 40px var(--red-glow), 0 0 80px rgba(200,20,0,0.3);
@@ -193,7 +222,7 @@
             #reveal .pct-line {
                 margin-top: 1.2rem;
                 font-family: "Bebas Neue", sans-serif;
-                font-size: clamp(1rem, 5vw, 2.2rem);
+                font-size: clamp(1.5rem, 7vw, 2.2rem);
                 letter-spacing: 0.25em; text-align: center;
             }
             #reveal .pct-line.gut {
@@ -219,7 +248,7 @@
             .path-sep { color: #3a0500; }
             #reveal button {
                 margin-top: 2rem;
-                width: min(300px, 88%);
+                width: min(360px, 92%);
                 padding: 14px 20px;
                 border: 1px solid var(--red); background: transparent;
                 color: var(--red); font-family: "Cinzel", serif;
@@ -227,13 +256,28 @@
                 letter-spacing: 0.35em; cursor: pointer;
                 transition: background 0.35s, color 0.35s, box-shadow 0.35s;
                 box-shadow: 0 0 12px rgba(200,18,0,0.2);
-                /* big touch target */
                 min-height: 48px;
             }
             #reveal button:active,
             #reveal button:hover {
                 background: var(--red); color: #000;
                 box-shadow: 0 0 30px var(--red-glow);
+            }
+            #promo-btn {
+                margin-top: 1rem;
+                width: min(360px, 92%);
+                padding: 16px 20px;
+                border: 1px solid var(--red); background: var(--red);
+                color: #000; font-family: "Bebas Neue", sans-serif;
+                font-size: clamp(1rem, 3.5vw, 1.4rem);
+                letter-spacing: 0.3em; text-align: center; text-decoration: none;
+                box-shadow: 0 0 30px var(--red-glow);
+                transition: background 0.35s, color 0.35s;
+                min-height: 52px;
+                display: flex; align-items: center; justify-content: center;
+            }
+            #promo-btn:hover, #promo-btn:active {
+                background: transparent; color: var(--red);
             }
 
             /* ── Desktop enhancements ──────────────────────────── */
@@ -250,8 +294,12 @@
                 #reveal .cover-wrap { margin-bottom: 2rem; }
                 #reveal .path { margin-top: 3rem; }
                 #reveal button { margin-top: 3rem; }
-                #lbl-l { left: 26%; }
-                #lbl-r { right: 26%; }
+            }
+
+            /* ── Mobile: hide side text, expand doors ─────────── */
+            @media (max-width: 600px) {
+                .door-side { display: none; }
+                .door-item { flex: 1; }
             }
 
             /* ── Landscape phone — keep reveal compact ─────────── */
@@ -464,9 +512,22 @@
             </div>
 
             <div id="lyric"></div>
-            <div id="choice-prompt">WÄHLE DEINEN WEG</div>
-            <div id="lbl-l" class="door-label"></div>
-            <div id="lbl-r" class="door-label"></div>
+
+            <div id="door-screen">
+                <div id="door-main">
+                    <div class="door-side" id="door-side-l"></div>
+                    <div class="door-item" id="door-left">
+                        <div class="door-item-label" id="door-lbl-l"></div>
+                        <img src="curved_good.png" alt="" />
+                    </div>
+                    <div class="door-item" id="door-right">
+                        <div class="door-item-label" id="door-lbl-r"></div>
+                        <img src="curved_evil.png" alt="" />
+                    </div>
+                    <div class="door-side" id="door-side-r"></div>
+                </div>
+                <div id="door-screen-lyric"></div>
+            </div>
 
             <div id="pips">
                 <div class="pip" id="p0"></div>
@@ -486,6 +547,7 @@
                 <div class="pct-line" id="pct-line"></div>
                 <div class="path" id="path"></div>
                 <button onclick="share()">TEILE DEINEN WEG</button>
+                <a href="https://music.monopol-ai.de/weg" target="_blank" id="promo-btn">FINDE DEINEN WEG</a>
             </div>
         </div>
 
@@ -519,18 +581,18 @@
             const STEPS = [
                 {
                     lyric: "DU HAST GEWARTET",
-                    left: { name: "GEDULD", hex: 0x660000 },
-                    right: { name: "DRANG", hex: 0xaa2200 },
+                    left:  { name: "GEDULD",  hex: 0x660000, desc: "Geduld ist Tugend\nwider Hast und Zorn." },
+                    right: { name: "DRANG",   hex: 0xaa2200, desc: "Dunkles Treiben ohne Maß." },
                 },
                 {
                     lyric: "ALLES FÜGT SICH",
-                    left: { name: "ORDNUNG", hex: 0x440000 },
-                    right: { name: "CHAOS", hex: 0x880d00 },
+                    left:  { name: "ORDNUNG", hex: 0x440000, desc: "Harmonie, Maß\nund fester Halt." },
+                    right: { name: "CHAOS",   hex: 0x880d00, desc: "Aus dem Sturm wächst\ndie neue Form." },
                 },
                 {
                     lyric: "ES IST NICHT ZU SPÄT",
-                    left: { name: "LICHT", hex: 0xcc3300 },
-                    right: { name: "DUNKEL", hex: 0x220000 },
+                    left:  { name: "LICHT",   hex: 0xcc3300, desc: "Himmelsglanz, Klarheit\nund heiliger Schein." },
+                    right: { name: "DUNKEL",  hex: 0x220000, desc: "Im Dunkel wartet,\nwas du nicht siehst." },
                 },
             ];
 
@@ -543,10 +605,9 @@
             let camZ = 0,
                 targetZ = 0;
             let picked = [];
-            let sides = []; // 0 = holy/left, 1 = evil/right
-            let doors = [];
+            let sides = [];
             let candleLights = [];
-            let hovered = null;
+            let shareBlob = null;
 
             // ── Three.js bootstrap ────────────────────────────────────────────────────────
 
@@ -688,113 +749,10 @@
 
             for (let i = 0; i < 4; i++) addCorridor(-i * SEG, -(i + 1) * SEG);
 
-            // ── Door textures (preload) ───────────────────────────────────────────────────
-
-            const texLoader = new THREE.TextureLoader();
-            function loadDoorTex(url) {
-                const t = texLoader.load(url);
-                t.magFilter = THREE.LinearFilter;
-                t.minFilter = THREE.LinearMipmapLinearFilter;
-                t.anisotropy = renderer.capabilities.getMaxAnisotropy();
-                return t;
-            }
-            const holyTex = loadDoorTex("holydoor.jpg");
-            const evilTex = loadDoorTex("eevildoort.jpg");
-
-            // ── Doors ─────────────────────────────────────────────────────────────────────
-
-            // left (i=0) = holy/GUT, right (i=1) = evil/BÖSE — always
-            function spawnDoors(zPos) {
-                doors = [];
-                const fH = 2.7,
-                    fW = 1.5;
-
-                [
-                    {
-                        x: -CW / 4,
-                        i: 0,
-                        tex: holyTex,
-                        glowColor: 0xd4a820,
-                        tint: 0x888888,
-                    },
-                    {
-                        x: CW / 4,
-                        i: 1,
-                        tex: evilTex,
-                        glowColor: 0xcc0000,
-                        tint: 0xffffff,
-                    },
-                ].forEach(({ x, i, tex, glowColor, tint }) => {
-                    const mat = new THREE.MeshBasicMaterial({
-                        map: tex,
-                        color: tint,
-                    });
-                    const mesh = new THREE.Mesh(
-                        new THREE.BoxGeometry(fW, fH, 0.1),
-                        mat,
-                    );
-                    mesh.position.set(x, fH / 2, zPos);
-                    mesh.userData = { i, glowColor, glowAmt: 0 };
-                    scene.add(mesh);
-
-                    const glow = new THREE.PointLight(glowColor, 0, 5);
-                    glow.position.set(x, fH * 0.8, zPos - 0.8);
-                    scene.add(glow);
-                    mesh.userData.glow = glow;
-
-                    doors.push(mesh);
-                });
-            }
-
-            // ── Raycasting ────────────────────────────────────────────────────────────────
-
-            const ray = new THREE.Raycaster();
-            const ptr = new THREE.Vector2();
-
-            function updatePointer(cx, cy) {
-                ptr.set((cx / innerWidth) * 2 - 1, -(cy / innerHeight) * 2 + 1);
-            }
-
-            renderer.domElement.addEventListener("mousemove", (e) => {
-                updatePointer(e.clientX, e.clientY);
-                if (phase !== "choose") {
-                    hovered = null;
-                    renderer.domElement.style.cursor = "default";
-                    return;
-                }
-                ray.setFromCamera(ptr, camera);
-                const hits = ray.intersectObjects(doors);
-                hovered = hits.length ? hits[0].object : null;
-                renderer.domElement.style.cursor = hovered
-                    ? "pointer"
-                    : "default";
-            });
-
-            renderer.domElement.addEventListener("click", () => {
-                if (phase === "choose" && hovered)
-                    chooseDoor(hovered.userData.i);
-            });
-
-            renderer.domElement.addEventListener(
-                "touchstart",
-                (e) => {
-                    const t = e.touches[0];
-                    updatePointer(t.clientX, t.clientY);
-                    ray.setFromCamera(ptr, camera);
-                    const hits = ray.intersectObjects(doors);
-                    if (phase === "choose" && hits.length)
-                        chooseDoor(hits[0].object.userData.i);
-                    e.preventDefault();
-                },
-                { passive: false },
-            );
-
             // ── UI helpers ────────────────────────────────────────────────────────────────
 
             const lyricEl = document.getElementById("lyric");
-            const promptEl = document.getElementById("choice-prompt");
-            const lblL = document.getElementById("lbl-l");
-            const lblR = document.getElementById("lbl-r");
+            const doorScreen = document.getElementById("door-screen");
 
             function showLyric(text, fadeAfter = 0) {
                 lyricEl.textContent = text;
@@ -803,19 +761,19 @@
                     setTimeout(() => (lyricEl.style.opacity = 0), fadeAfter);
             }
 
-            function showChoiceUI() {
+            function showDoorScreen() {
                 const s = STEPS[step];
-                promptEl.style.opacity = 1;
-                lblL.textContent = s.left.name;
-                lblL.style.opacity = 1;
-                lblR.textContent = s.right.name;
-                lblR.style.opacity = 1;
+                document.getElementById("door-lbl-l").textContent = s.left.name;
+                document.getElementById("door-lbl-r").textContent = s.right.name;
+                document.getElementById("door-side-l").textContent = s.left.desc;
+                document.getElementById("door-side-r").textContent = s.right.desc;
+                document.getElementById("door-screen-lyric").textContent = s.lyric;
+                lyricEl.style.opacity = 0;
+                doorScreen.classList.add("on");
             }
 
-            function hideChoiceUI() {
-                promptEl.style.opacity = 0;
-                lblL.style.opacity = 0;
-                lblR.style.opacity = 0;
+            function hideDoorScreen() {
+                doorScreen.classList.remove("on");
             }
 
             function litPip(i) {
@@ -833,7 +791,6 @@
                     document.getElementById("pips").style.opacity = 1;
                     showLyric("DEINE ZEIT IST GEKOMMEN", 2600);
                     setTimeout(() => {
-                        spawnDoors(DOOR_Z[0]);
                         targetZ = DOOR_Z[0] + 3.8;
                         phase = "walk";
                     }, 700);
@@ -841,19 +798,13 @@
             }
 
             function chooseDoor(idx) {
+                if (phase !== "choose") return;
                 const s = STEPS[step];
                 picked.push(idx === 0 ? s.left : s.right);
                 sides.push(idx);
                 litPip(step);
-                hideChoiceUI();
+                hideDoorScreen();
                 lyricEl.style.opacity = 0;
-
-                doors.forEach((d) => {
-                    scene.remove(d.userData.glow);
-                    scene.remove(d);
-                });
-                doors = [];
-                hovered = null;
 
                 step++;
                 phase = "walk";
@@ -861,14 +812,11 @@
                 if (step < 3) {
                     showLyric(s.lyric, 2400);
                     targetZ = DOOR_Z[step] + 3.8;
-                    setTimeout(() => {
-                        spawnDoors(DOOR_Z[step]);
-                    }, 500);
                 } else {
                     showLyric("DER MEISTER HAT DEN WEG");
                     targetZ = DOOR_Z[2] - SEG * 0.55;
                     phase = "final";
-                    setTimeout(showReveal, 4200);
+                    setTimeout(showReveal, 2600);
                 }
             }
 
@@ -876,7 +824,6 @@
                 phase = "done";
                 lyricEl.style.opacity = 0;
 
-                // Percentage line
                 const gutCount = sides.filter((s) => s === 0).length;
                 const boeseCount = 3 - gutCount;
                 const dominant = gutCount >= boeseCount ? "gut" : "boese";
@@ -903,27 +850,52 @@
                 });
 
                 document.getElementById("reveal").classList.add("on");
+
+                // Dynamically load html2canvas then pre-render screenshot
+                setTimeout(() => {
+                    const doCapture = () => {
+                        html2canvas(document.getElementById("reveal"), {
+                            backgroundColor: "#000000", scale: 2,
+                            useCORS: true, logging: false,
+                        }).then((c) => c.toBlob((b) => { shareBlob = b; }, "image/png"))
+                          .catch(() => {});
+                    };
+                    if (typeof html2canvas !== "undefined") {
+                        doCapture();
+                    } else {
+                        const s = document.createElement("script");
+                        s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+                        s.onload = doCapture;
+                        document.head.appendChild(s);
+                    }
+                }, 800);
             }
 
             window.share = function () {
                 const path = picked.map((p) => p.name).join(" → ");
                 const text = `Mein Weg: ${path}\n"Alle Wege führen zum Meister."\n\n#MisterMonopol #DerMeisterHatDenWeg`;
+                const url = "https://music.monopol-ai.de/weg";
+
+                if (shareBlob && navigator.canShare) {
+                    const file = new File([shareBlob], "mein-weg.png", { type: "image/png" });
+                    if (navigator.canShare({ files: [file] })) {
+                        navigator.share({ title: "DER MEISTER HAT DEN WEG", text, files: [file], url });
+                        return;
+                    }
+                }
+
                 if (navigator.share) {
-                    navigator.share({
-                        title: "MM MM MISTER MONOPOL",
-                        text,
-                        url: location.href,
-                    });
+                    navigator.share({ title: "DER MEISTER HAT DEN WEG", text, url });
                 } else {
                     navigator.clipboard
-                        .writeText(text + "\n" + location.href)
+                        .writeText(text + "\n" + url)
                         .then(() => alert("In Zwischenablage kopiert!"));
                 }
             };
 
-            document
-                .getElementById("intro")
-                .addEventListener("click", startGame);
+            document.getElementById("intro").addEventListener("click", startGame);
+            document.getElementById("door-left").addEventListener("click", () => chooseDoor(0));
+            document.getElementById("door-right").addEventListener("click", () => chooseDoor(1));
 
             // ── Render loop ───────────────────────────────────────────────────────────────
 
@@ -937,11 +909,9 @@
                 if (phase === "walk" || phase === "final") {
                     const diff = targetZ - camZ;
                     camZ += diff * Math.min(dt * 1.9, 0.09);
-                    if (phase === "walk" && Math.abs(diff) < 0.06) {
-                        camZ = targetZ;
+                    if (phase === "walk" && Math.abs(diff) < 3.5) {
                         phase = "choose";
-                        showLyric(STEPS[step].lyric);
-                        showChoiceUI();
+                        showDoorScreen();
                     }
                 }
 
@@ -950,16 +920,6 @@
                 camera.position.y =
                     1.65 + Math.sin(t * 1.75) * (walking ? 0.024 : 0.007);
                 camera.position.x = Math.sin(t * 0.87) * (walking ? 0.011 : 0);
-
-                doors.forEach((d) => {
-                    const targetBrightness = d === hovered ? 1.25 : 1.0;
-                    const cur = d.material.color.r;
-                    const next = THREE.MathUtils.lerp(cur, targetBrightness, 0.09);
-                    d.material.color.setScalar(next);
-                    const wantGlow = d === hovered ? 1.2 : 0;
-                    d.userData.glowAmt = THREE.MathUtils.lerp(d.userData.glowAmt, wantGlow, 0.09);
-                    d.userData.glow.intensity = d.userData.glowAmt;
-                });
 
                 candleLights.forEach((l, i) => {
                     l.intensity =
