@@ -935,10 +935,10 @@
                 phase = "walk";
 
                 if (step < 3) {
-                    showLyric(s.lyric, 2400);
+                    setTimeout(() => showLyric(s.lyric, 2400), 500);
                     targetZ = DOOR_Z[step] + 3.8;
                 } else {
-                    showLyric("DER MEISTER HAT DEN WEG");
+                    setTimeout(() => showLyric("DER MEISTER HAT DEN WEG"), 500);
                     targetZ = DOOR_Z[2] - SEG * 0.55;
                     phase = "final";
                     setTimeout(showReveal, 2600);
