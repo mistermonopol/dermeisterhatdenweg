@@ -12,7 +12,8 @@
       "Bash(Start-Process python *)",
       "PowerShell(Stop-Process -Name python -Force -ErrorAction SilentlyContinue)",
       "Bash(git pull *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(git ls-remote *)"
     ]
   }
 }
