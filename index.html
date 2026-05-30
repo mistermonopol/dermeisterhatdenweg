@@ -688,8 +688,8 @@
                 audio.currentTime = 33;
                 audio.play().catch(() => {});
                 const step = () => {
-                    if (audio.volume < 0.5) {
-                        audio.volume = Math.min(audio.volume + 0.012, 0.5);
+                    if (audio.volume < 0.1337) {
+                        audio.volume = Math.min(audio.volume + 0.006, 0.1337);
                         setTimeout(step, 120);
                     }
                 };
