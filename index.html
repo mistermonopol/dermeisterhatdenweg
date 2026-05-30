@@ -326,6 +326,63 @@
                 #intro .cta { font-size: clamp(0.7rem, 3vw, 0.9rem); }
             }
 
+            /* ── Legal bar + modal ─────────────────────────────── */
+            #legal-bar {
+                position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
+                display: flex; gap: 12px; align-items: center;
+                z-index: 40; pointer-events: all;
+            }
+            #legal-bar button {
+                background: none; border: none; cursor: pointer;
+                font-family: "Cinzel", serif;
+                font-size: clamp(0.48rem, 1.5vw, 0.55rem);
+                letter-spacing: 0.25em; color: #3a0800;
+                transition: color 0.3s;
+                padding: 4px 6px;
+            }
+            #legal-bar button:hover { color: var(--red-dim); }
+            #legal-bar span { color: #1a0400; font-size: 0.5rem; }
+            #legal-modal {
+                position: fixed; inset: 0; z-index: 50;
+                background: rgba(0,0,0,0.94);
+                display: flex; flex-direction: column;
+                align-items: center; justify-content: flex-start;
+                padding: 6vh 6vw; overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            #legal-modal.hidden { display: none; }
+            #legal-modal-inner {
+                max-width: 640px; width: 100%;
+                font-family: "Cinzel", serif;
+                color: var(--red-dim);
+                font-size: clamp(0.65rem, 2vw, 0.78rem);
+                letter-spacing: 0.08em; line-height: 2;
+            }
+            #legal-modal-inner h2 {
+                font-family: "Bebas Neue", sans-serif;
+                font-size: clamp(1.4rem, 5vw, 2.2rem);
+                letter-spacing: 0.3em; color: var(--red);
+                text-shadow: 0 0 20px var(--red-glow);
+                margin-bottom: 1.5rem;
+            }
+            #legal-modal-inner h3 {
+                margin-top: 1.2rem; margin-bottom: 0.4rem;
+                font-size: clamp(0.7rem, 2vw, 0.85rem);
+                letter-spacing: 0.2em; color: var(--red);
+            }
+            #legal-modal-inner p { margin-bottom: 0.8rem; }
+            #legal-modal-inner a { color: var(--red-dim); }
+            #legal-close {
+                margin-top: 2rem;
+                background: none; border: 1px solid var(--red-dim);
+                color: var(--red-dim); font-family: "Cinzel", serif;
+                font-size: clamp(0.55rem, 1.8vw, 0.65rem);
+                letter-spacing: 0.3em; cursor: pointer;
+                padding: 10px 24px;
+                transition: border-color 0.3s, color 0.3s;
+            }
+            #legal-close:hover { border-color: var(--red); color: var(--red); }
+
             /* ── Landscape phone — keep reveal compact ─────────── */
             @media (max-height: 500px) {
                 #reveal { flex-direction: row; flex-wrap: wrap; padding: 4vh 4vw; gap: 0 3vw; }
@@ -576,6 +633,54 @@
                 <a href="https://music.monopol-ai.de/weg" target="_blank" id="promo-btn">FINDE DEINEN WEG</a>
             </div>
         </div>
+
+        <!-- Legal bar -->
+        <div id="legal-bar">
+            <button onclick="openLegal('impressum')">IMPRESSUM</button>
+            <span>|</span>
+            <button onclick="openLegal('datenschutz')">DATENSCHUTZ</button>
+        </div>
+
+        <!-- Legal modal -->
+        <div id="legal-modal" class="hidden">
+            <div id="legal-modal-inner"></div>
+            <button id="legal-close" onclick="closeLegal()">SCHLIESSEN</button>
+        </div>
+
+        <script>
+            const LEGAL_TEXTS = {
+                impressum: `
+                    <h2>IMPRESSUM</h2>
+                    <h3>ANGABEN GEMÄß § 5 TMG</h3>
+                    <p>Max Felle<br>Daimlerstraße 115<br>70372 Stuttgart (Bad Cannstatt)<br>Deutschland</p>
+                    <h3>KONTAKT</h3>
+                    <p>E-Mail: <a href="mailto:derdildi@googlemail.com">derdildi@googlemail.com</a></p>
+                    <h3>HINWEIS</h3>
+                    <p>Diese Website dient ausschließlich künstlerischen und promotionalen Zwecken.</p>
+                `,
+                datenschutz: `
+                    <h2>DATENSCHUTZ&shy;ERKLÄRUNG</h2>
+                    <h3>VERANTWORTLICHER</h3>
+                    <p>Max Felle, Daimlerstraße 115, 70372 Stuttgart (Bad Cannstatt)<br>
+                    E-Mail: <a href="mailto:derdildi@googlemail.com">derdildi@googlemail.com</a></p>
+                    <h3>ERHEBUNG VON DATEN</h3>
+                    <p>Diese Website erhebt keine personenbezogenen Daten. Es werden keine Cookies gesetzt, kein Tracking durchgeführt und keine Nutzerdaten gespeichert.</p>
+                    <h3>HOSTING</h3>
+                    <p>Die Website wird auf einem Server in der EU gehostet. Beim Aufruf der Seite werden vom Webserver technisch bedingt die IP-Adresse und der Zeitpunkt des Abrufs kurzzeitig verarbeitet. Diese Daten werden nicht gespeichert.</p>
+                    <h3>EXTERNER LINK — REBRANDLY</h3>
+                    <p>Der Button <strong>„FINDE DEINEN WEG"</strong> führt über einen gekürzten Link des Dienstes Rebrandly (Rebrandly Inc.). Durch Klick auf diesen Button willigst du ein, dass Rebrandly den Klick erfassen und verarbeiten kann (z. B. Klickzählung, Herkunftsland). Weitere Informationen zum Datenschutz von Rebrandly findest du unter: <a href="https://www.rebrandly.com/privacy-policy" target="_blank">rebrandly.com/privacy-policy</a></p>
+                    <h3>DEINE RECHTE</h3>
+                    <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung deiner Daten gemäß DSGVO. Kontakt: <a href="mailto:derdildi@googlemail.com">derdildi@googlemail.com</a></p>
+                `
+            };
+            function openLegal(key) {
+                document.getElementById('legal-modal-inner').innerHTML = LEGAL_TEXTS[key];
+                document.getElementById('legal-modal').classList.remove('hidden');
+            }
+            function closeLegal() {
+                document.getElementById('legal-modal').classList.add('hidden');
+            }
+        </script>
 
         <script type="module">
             import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
