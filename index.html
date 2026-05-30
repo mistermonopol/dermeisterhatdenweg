@@ -158,6 +158,15 @@
                 letter-spacing: 0.06em; color: #cc0000;
                 text-shadow: 0 0 16px rgba(220,0,0,0.95), 0 0 36px rgba(180,0,0,0.6);
             }
+            .door-item-desc {
+                display: none; /* shown only on mobile */
+                font-family: "Cinzel", serif; font-weight: 600;
+                font-size: clamp(0.85rem, 3.5vw, 1.1rem);
+                letter-spacing: 0.05em; line-height: 1.6;
+                color: var(--red); text-align: center;
+                text-shadow: 0 0 10px var(--red-glow);
+                white-space: pre-line; flex-shrink: 0;
+            }
             .door-item img {
                 width: 100%; flex: 1; min-height: 0;
                 object-fit: contain; display: block;
@@ -296,10 +305,13 @@
                 #reveal button { margin-top: 3rem; }
             }
 
-            /* ── Mobile: hide side text, expand doors ─────────── */
+            /* ── Mobile: desc above doors, hide side panels ───── */
             @media (max-width: 600px) {
                 .door-side { display: none; }
                 .door-item { flex: 1; }
+                .door-item-desc { display: block; }
+                .door-item-label { font-size: clamp(2rem, 10vw, 3.5rem); }
+                #door-screen-lyric { font-size: clamp(1.2rem, 5vw, 1.8rem); }
             }
 
             /* ── Landscape phone — keep reveal compact ─────────── */
@@ -518,10 +530,12 @@
                     <div class="door-side" id="door-side-l"></div>
                     <div class="door-item" id="door-left">
                         <div class="door-item-label" id="door-lbl-l"></div>
+                        <div class="door-item-desc" id="door-desc-l"></div>
                         <img src="curved_good.png" alt="" />
                     </div>
                     <div class="door-item" id="door-right">
                         <div class="door-item-label" id="door-lbl-r"></div>
+                        <div class="door-item-desc" id="door-desc-r"></div>
                         <img src="curved_evil.png" alt="" />
                     </div>
                     <div class="door-side" id="door-side-r"></div>
@@ -607,7 +621,6 @@
             let picked = [];
             let sides = [];
             let candleLights = [];
-            let shareBlob = null;
 
             // ── Three.js bootstrap ────────────────────────────────────────────────────────
 
@@ -767,6 +780,8 @@
                 document.getElementById("door-lbl-r").textContent = s.right.name;
                 document.getElementById("door-side-l").textContent = s.left.desc;
                 document.getElementById("door-side-r").textContent = s.right.desc;
+                document.getElementById("door-desc-l").textContent = s.left.desc;
+                document.getElementById("door-desc-r").textContent = s.right.desc;
                 document.getElementById("door-screen-lyric").textContent = s.lyric;
                 lyricEl.style.opacity = 0;
                 doorScreen.classList.add("on");
@@ -850,25 +865,6 @@
                 });
 
                 document.getElementById("reveal").classList.add("on");
-
-                // Dynamically load html2canvas then pre-render screenshot
-                setTimeout(() => {
-                    const doCapture = () => {
-                        html2canvas(document.getElementById("reveal"), {
-                            backgroundColor: "#000000", scale: 2,
-                            useCORS: true, logging: false,
-                        }).then((c) => c.toBlob((b) => { shareBlob = b; }, "image/png"))
-                          .catch(() => {});
-                    };
-                    if (typeof html2canvas !== "undefined") {
-                        doCapture();
-                    } else {
-                        const s = document.createElement("script");
-                        s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-                        s.onload = doCapture;
-                        document.head.appendChild(s);
-                    }
-                }, 800);
             }
 
             window.share = function () {
@@ -876,20 +872,15 @@
                 const text = `Mein Weg: ${path}\n"Alle Wege führen zum Meister."\n\n#MisterMonopol #DerMeisterHatDenWeg`;
                 const url = "https://music.monopol-ai.de/weg";
 
-                if (shareBlob && navigator.canShare) {
-                    const file = new File([shareBlob], "mein-weg.png", { type: "image/png" });
-                    if (navigator.canShare({ files: [file] })) {
-                        navigator.share({ title: "DER MEISTER HAT DEN WEG", text, files: [file], url });
-                        return;
-                    }
-                }
-
                 if (navigator.share) {
-                    navigator.share({ title: "DER MEISTER HAT DEN WEG", text, url });
+                    navigator.share({ title: "DER MEISTER HAT DEN WEG", text, url }).catch(() => {});
                 } else {
-                    navigator.clipboard
-                        .writeText(text + "\n" + url)
-                        .then(() => alert("In Zwischenablage kopiert!"));
+                    try {
+                        navigator.clipboard.writeText(text + "\n" + url);
+                        alert("In Zwischenablage kopiert!");
+                    } catch (e) {
+                        alert("Link: " + url);
+                    }
                 }
             };
 
