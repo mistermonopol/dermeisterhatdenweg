@@ -311,8 +311,19 @@
                 .door-side { display: none; }
                 .door-item { flex: 1; }
                 .door-item-desc { display: block; }
-                .door-item-label { font-size: clamp(2rem, 10vw, 3.5rem); }
+                /* smaller label so ORDNUNG doesn't overflow ~175px column */
+                .door-item-label { font-size: clamp(1.6rem, 8vw, 3rem); }
+                /* good/left desc gold, evil/right stays red */
+                #door-desc-l {
+                    color: #d4a830;
+                    text-shadow: 0 0 14px rgba(220,170,50,0.8);
+                }
                 #door-screen-lyric { font-size: clamp(1.2rem, 5vw, 1.8rem); }
+                /* intro screen bigger */
+                #intro h1 { font-size: clamp(2.4rem, 12vw, 4rem); }
+                #intro .body { font-size: clamp(0.95rem, 4.5vw, 1.3rem); }
+                #intro .disclaimer { font-size: clamp(0.7rem, 3vw, 0.9rem); }
+                #intro .cta { font-size: clamp(0.7rem, 3vw, 0.9rem); }
             }
 
             /* ── Landscape phone — keep reveal compact ─────────── */
@@ -871,7 +882,7 @@
             window.share = function () {
                 const path = picked.map((p) => p.name).join(" → ");
                 const text = `Mein Weg: ${path}\n"Alle Wege führen zum Meister."\n\n#MisterMonopol #DerMeisterHatDenWeg`;
-                const url = "https://music.monopol-ai.de/weg";
+                const url = "https://meister.monopol-ai.de/";
 
                 if (navigator.share) {
                     navigator.share({ title: "DER MEISTER HAT DEN WEG", text, url }).catch(() => {});
