@@ -688,8 +688,8 @@
                 audio.currentTime = 33;
                 audio.play().catch(() => {});
                 const step = () => {
-                    if (audio.volume < 0.1337) {
-                        audio.volume = Math.min(audio.volume + 0.006, 0.1337);
+                    if (audio.volume < 0.05) {
+                        audio.volume = Math.min(audio.volume + 0.003, 0.05);
                         setTimeout(step, 120);
                     }
                 };
@@ -948,6 +948,13 @@
             function showReveal() {
                 phase = "done";
                 lyricEl.style.opacity = 0;
+                const fadeToReveal = () => {
+                    if (audio.volume < 0.07) {
+                        audio.volume = Math.min(audio.volume + 0.002, 0.07);
+                        setTimeout(fadeToReveal, 120);
+                    }
+                };
+                fadeToReveal();
 
                 const gutCount = sides.filter((s) => s === 0).length;
                 const boeseCount = 3 - gutCount;
