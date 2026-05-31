@@ -987,7 +987,7 @@
             window.share = function () {
                 const path = picked.map((p) => p.name).join(" → ");
                 const text = `Mein Weg: ${path}\n"Alle Wege führen zum Meister."\n\n#MisterMonopol #DerMeisterHatDenWeg`;
-                const url = "https://music.monopol-ai.de/weg";
+                const url = "https://meister.monopol-ai.de/";
 
                 if (navigator.share) {
                     navigator.share({ title: "DER MEISTER HAT DEN WEG", text, url }).catch(() => {});
